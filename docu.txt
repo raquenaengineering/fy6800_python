@@ -1,0 +1,129 @@
+
+
+
+In this document, all findings regarding to the reverse engineering of the serial protocol for the 
+FY6800 will be documented.
+
+
+
+ID PARAMETERS:
+
+	Device ID:						UID		// returns a long number, useful to differentiate several devices.
+	Device Model:					UMO		// use this parameter to AUTODETECT the function generator !!!
+
+WAVE PARAMETERS LIST:
+	
+	Change wave ch1: 				WMW25
+	Change wave ch2:				WFW25
+
+	Enable channel 1:	 			WMN1
+	Disable channel 1:				WMN0
+	Enable channel 1:	 			WFN1
+	Disable channel 1:				WFN0
+
+
+	Change freq ch1:				WMF00000010,000000 
+	Change freq ch2:				WFF00000010,000000 
+
+	Change Amplitude ch1:			WMA01,0000
+	Change Amplitude ch2:			WFA01,0000
+
+	Change Offset ch1:				WMO02,000
+	Change Offset ch2:				WFO02,000
+
+	Change duty ch1:				WMD02,000
+	Change duty ch1:				WFD02,000
+
+	Change phase ch1:				WMP90,000
+	Change phase ch2:				WFP45,000
+
+
+WAVEFORM LIST:
+
+	0 : sine 
+	1: square
+	2: cmos
+	3: adj-pulse	Note: Requires second parameter WMSXX, maxval:4000000000 minval:10
+	4: dc 			Note: Requires second parameter WMP, 
+	5: triangle
+	6: ramp
+	7: neg-ramp
+	8: stair-trgl
+	9: stair-step
+	10: neg-stair
+	11: pos-exp
+	12: neg-exp
+	13: pos-fall-exp
+	14: neg-fall-exp
+	15: pos-log
+	16: neg-log
+	17: pos-fall-log
+	18: neg-fall-log
+	19: pos-full-wave
+	20: neg-full-wave
+	21: pos-half-wave
+	22: neg-half-wave
+	23: lorenz-pulse
+	24: multitone (what tones are used ???)
+	25: rand-noise (does the frequency parameter change anything here?)
+	26: ECG
+	27: trapezoid
+	28: sinc-puls
+	29: impulse
+	30: AWGN (what does this mean ???)
+	31: AM (amplitude modulated)
+	32: FM (freq-mod)
+	33: chirp (wtf is this???)
+	34: EMPTY
+	35: EMPTY
+	
+	GOES ON UNTIL 97 
+
+
+CREATING CUSTOM WAVEFORMS:
+
+	DDS_WAVE64  (DDS_WAVE_XX where XX are the wave indexes)
+	Then:
+		- 8192 samples 
+		- 16 bits/sample
+		- max value = FF 3F
+		- min value = 00 00
+		- center value = 8F FF ???
+		- the LSB goes first (so the value is 3F FF)
+
+
+MODULATIONS:
+
+
+SWEEPS: (BETTER DONE IN SOFTWARE, I THINK GIVES MORE CONTROL)
+
+SOB0: Chooses frequency sweep.
+SOB1: Amplitude sweep. 
+SOB2: Offset sweep. 
+SOB3: Duty Cycle sweep. 	
+
+SXY1: 
+
+
+MEASURE:
+
+GATE 1S:		WCG0	// don't really know what the hell does this mean.						
+GATE 10S:		WCG1
+GATE 100S:		WCG2
+
+
+OTHER OPTIONS:
+
+UBZ1: ENABLES BUZZER 
+UBZ0: DISABLES BUZZER 	
+UMS0: UPLINK MASTER  	// when the hell am I using this uplink?
+UMS1: UPLINK SLAVE		// get the user manual to check what's this uplink. 
+UUL0: UPLINK ON
+UUL1: UPLINK OFF 		// still what the hell is this uplink ?? 
+
+
+
+
+
+
+NOTES:
