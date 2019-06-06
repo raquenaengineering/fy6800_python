@@ -1,7 +1,10 @@
 
-
+# NOTE: \r\n are required as endline characters for the comminication to work
+# NOTE: it seems a pause between change in channels is required for the changes to work properly
 import serial
 import serial.tools.list_ports
+
+import time 
 
 # WAVEFORM LIST:
 
@@ -115,6 +118,7 @@ class fy6800:
 		
 		
 	def autodetect_serialport(self):			# for methods, self need to be always given as a parameter.
+		
 		serial_port = None
 		ports = list(serial.tools.list_ports.comports())
 		print(ports)
@@ -127,6 +131,49 @@ class fy6800:
 			port_names.append(port[0])	# here all names get stored
 		print(port_names)
 		print("---------------------------------------------------")
+
+		for port_name in port_names:		# let's go through all ports
+			try:
+				ser = serial.Serial(		# serial constructor
+					port=port_name, 
+					baudrate=115200, 
+					#bytesize=EIGHTBITS, 
+					#parity=PARITY_NONE, 
+					#stopbits=STOPBITS_ONE, 
+					timeout=None, 
+					xonxoff=False, 
+					rtscts=False, 
+					write_timeout=None, 
+					dsrdtr=False, 
+					inter_byte_timeout=None, 
+					exclusive=None)
+					
+				print (ser.name) 				# only for testing !!! 
+				ser.write(b"UMO\n")
+				ser.write(b"UMO\n")
+				ser.write(b"UMO\n")
+				ser.read_until(expected=LF, size=None)
+				ser.write(b"UID\n")
+				#print(ser.readln())
+				# ser.write(b"WMW1\n")
+				# ser.write(b"WMA1,000\n")
+				# print("Channel 1 done")
+				# time.sleep(1)
+				# ser.write(b"WFW1\n")
+				# ser.write(b"WFA1,000\n")
+				# print("Channel 2 done")
+				# print("String sent to function generator")
+				# time.sleep(1)
+				ser.close()
+			except:
+				print("Serial Port " + port_name + " Failed to open")
+					
+			ser.write(b"UMO\n")
+			ser.write(b"UMO\n")
+			ser.write(b"UMO\n")
+			line = ser.readline()
+			print("this is the line " + str(line))
+			ser.write(b"UID\n")
 
 	
 		return serial_port
