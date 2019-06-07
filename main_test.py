@@ -22,31 +22,33 @@ print("Serial port of the functon generator: " + requested_port)
 
 # set/get wave type #
 
-channel = 0
-func_gen.set_wave(channel,sine)
-req_wave = func_gen.get_wave(channel)
-print("Wave on port " + str(channel) + ": " + req_wave)
+print("set/get wave")
 
-channel = 1
+channel = 0
 func_gen.set_wave(channel,triangle)
-req_wave = func_gen.get_wave(channel)
-print("Wave on port " + str(channel) + ": " + req_wave)
+
+#req_wave = func_gen.get_wave(channel)
+
+# channel = 1
+# func_gen.set_wave(channel,triangle)
+# req_wave = func_gen.get_wave(channel)
+# print("Wave on port " + str(channel) + ": " + req_wave)
 
 # modify get/set to return the name of the wave, instead of its number.  (tuples ???)
 
 #set/get amplitude#
 
-channel = 0
-ampl = 0.01
-func_gen.set_ampl(channel,ampl)
-req_ampl = func_gen.get_ampl(channel)
-print("Amplitude on port " + str(channel) + ": " + str(req_ampl))
+# channel = 0
+# ampl = 0.01
+# func_gen.set_ampl(channel,ampl)
+# req_ampl = func_gen.get_ampl(channel)
+# print("Amplitude on port " + str(channel) + ": " + str(req_ampl))
 
-channel = 1
-ampl = 1
-func_gen.set_ampl(channel,ampl)
-req_ampl = func_gen.get_ampl(channel)
-print("Amplitude on port " + str(channel) + ": " + str(req_ampl))
+# channel = 1
+# ampl = 1
+# func_gen.set_ampl(channel,ampl)
+# req_ampl = func_gen.get_ampl(channel)
+# print("Amplitude on port " + str(channel) + ": " + str(req_ampl))
 
 
 
