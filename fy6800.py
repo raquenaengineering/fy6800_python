@@ -146,11 +146,12 @@ class fy6800:
 					write_timeout=None, 
 					dsrdtr=False, 
 					inter_byte_timeout=None, 
-					exclusive=None)
-					
+					exclusive=None
+					)
+			except:
+				print("Serial Port " + port_name + " Failed to open")	
+							
 				print (ser.name) 				# only for testing !!! 
-				ser.write(b"UMO\n")
-				ser.write(b"UMO\n")
 				ser.write(b"UMO\n")
 				ser.read_until(expected=LF, size=None)
 				ser.write(b"UID\n")
@@ -165,26 +166,48 @@ class fy6800:
 				# print("String sent to function generator")
 				# time.sleep(1)
 				ser.close()
-			except:
-				print("Serial Port " + port_name + " Failed to open")
-					
-			ser.write(b"UMO\n")
-			ser.write(b"UMO\n")
-			ser.write(b"UMO\n")
-			line = ser.readline()
-			print("this is the line " + str(line))
-			ser.write(b"UID\n")
+
+				
+				
+			ser = serial.Serial(		# serial constructor
+				port=port_name, 
+				baudrate=115200, 
+				#bytesize=EIGHTBITS, 
+				#parity=PARITY_NONE, 
+				#stopbits=STOPBITS_ONE, 
+				timeout=None, 
+				xonxoff=False, 
+				rtscts=False, 
+				write_timeout=None, 
+				dsrdtr=False, 
+				inter_byte_timeout=None, 
+				exclusive=None
+				)	
+			ser.write(b"UMO\n")			# asks for the device name
+			dev_name = ser.readline()
+			dev_name = str(dev_name)
+			print("this is the device name " + str(dev_name))
+			if(dev_name.find("FY6800-40M") != -1):		## put the name of the device somewhere else
+				print("device found at " + port_name + " serial port")
+				return port_name
+
 
 	
-		return serial_port
 		
 	def set_serialport(self, port):
 		self.serial_port = port						# the port of this object, saves the value in port 
 		
 	def get_serialport(self):
-		return(self.serial_port)
+		return(self.serial_port_name)
 		
 	# WAVE #
+	
+	def get_wave(self, channel):
+		if channel == 0:
+			self.serialport 
+			return self.wave_a	
+		elif channel == 1:
+			return self.wave_b
 		
 	def set_wave(self, channel, wave):
 		if channel == 0:
@@ -195,11 +218,7 @@ class fy6800:
 			
 		# add guards to be sure the wave value is between 0 and 97 ??? 
 		
-	def get_wave(self, channel):
-		if channel == 0:
-			return self.wave_a	
-		elif channel == 1:
-			return self.wave_b
+
 		
 		
 	#AMPLITUDE#
