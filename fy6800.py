@@ -5,6 +5,9 @@ import serial
 import serial.tools.list_ports
 
 import time 
+import logging 	# an attempt to make debuggin easier 
+logging.basicConfig(level=logging.DEBUG)		# enable debug messages
+separator = "---------------------------------------------------"	# to separate debugging messages
 
 # WAVEFORM LIST:
 
@@ -62,9 +65,9 @@ class fy6800:
 	
 	# here all the INTERNAL VARIABLES for the classe fy6800 ############
 	
-	ser = serial.Serial()
+	serial_port = serial.Serial()		# variable storing a serial port object, used for communication 
 	
-	serial_port_name = None;	# has a variable called serial port, empty. 
+	serial_port_name = None;			# stores serial port name
 	
 	wave_a = None;		# current wave (only matching with device if not modified directly at the device )	
 	wave_b = None;
@@ -92,8 +95,20 @@ class fy6800:
 		self.serial_port = serial_port_name
 		
 		# open communication 
-		self.serial_port = serial.Serial(self.serial_port_name) # assigns serial port
-		
+		self.serial_port = serial.Serial(		# serial constructor
+							port=port_name, 
+							baudrate=115200, 
+							#bytesize=EIGHTBITS, 
+							#parity=PARITY_NONE, 
+							#stopbits=STOPBITS_ONE, 
+							timeout=None, 
+							xonxoff=False, 
+							rtscts=False, 
+							write_timeout=None, 
+							dsrdtr=False, 
+							inter_byte_timeout=None, 
+							exclusive=None
+							)
 		
 		# checks all serial ports
 		# sends a message to check if there's a fy6800 connected
@@ -101,14 +116,28 @@ class fy6800:
 		
 		
 	def __init__(self):
-			
+		logging.debug("Init")
 		# if no port is given as a parameter, autodetect serial port 
-		
 		# if port is given as parameter, use it 
 		self.serial_port_name = self.autodetect_serialport()
 		# open communication 
-		self.serial_port = serial.Serial(self.serial_port_name) # assigns serial port
-		
+		logging.debug("opening the port with the name obtained with autodetect")
+		# open communication 
+		self.serial_port = serial.Serial(		# serial constructor
+							port=self.serial_port_name, 
+							baudrate=115200, 
+							#bytesize=EIGHTBITS, 
+							#parity=PARITY_NONE, 
+							#stopbits=STOPBITS_ONE, 
+							timeout=None, 
+							xonxoff=False, 
+							rtscts=False, 
+							write_timeout=None, 
+							dsrdtr=False, 
+							inter_byte_timeout=None, 
+							exclusive=None
+							)		
+		logging.debug("open success")
 		
 		# checks all serial ports
 		# sends a message to check if there's a fy6800 connected
@@ -119,18 +148,17 @@ class fy6800:
 		
 	def autodetect_serialport(self):			# for methods, self need to be always given as a parameter.
 		
+		logging.debug('Running autodetect_serialport')
 		serial_port = None
 		ports = list(serial.tools.list_ports.comports())
-		print(ports)
-		print("---------------------------------------------------")
 		for p in ports:
-			print(p)
-		print("---------------------------------------------------")
+			logging.debug(p)
+		logging.debug("---------------------------------------------------")
 		port_names = []		# we store all port names in this variable
 		for port in ports:
 			port_names.append(port[0])	# here all names get stored
-		print(port_names)
-		print("---------------------------------------------------")
+		logging.debug(port_names)
+		logging.debug("---------------------------------------------------")
 
 		for port_name in port_names:		# let's go through all ports
 			try:
@@ -148,51 +176,25 @@ class fy6800:
 					inter_byte_timeout=None, 
 					exclusive=None
 					)
+				print("Serial Port " + port_name + " Open succesfuly")
 			except:
 				print("Serial Port " + port_name + " Failed to open")	
-							
-				print (ser.name) 				# only for testing !!! 
-				ser.write(b"UMO\n")
-				ser.read_until(expected=LF, size=None)
-				ser.write(b"UID\n")
-				#print(ser.readln())
-				# ser.write(b"WMW1\n")
-				# ser.write(b"WMA1,000\n")
-				# print("Channel 1 done")
-				# time.sleep(1)
-				# ser.write(b"WFW1\n")
-				# ser.write(b"WFA1,000\n")
-				# print("Channel 2 done")
-				# print("String sent to function generator")
-				# time.sleep(1)
 				ser.close()
 
 				
-				
-			ser = serial.Serial(		# serial constructor
-				port=port_name, 
-				baudrate=115200, 
-				#bytesize=EIGHTBITS, 
-				#parity=PARITY_NONE, 
-				#stopbits=STOPBITS_ONE, 
-				timeout=None, 
-				xonxoff=False, 
-				rtscts=False, 
-				write_timeout=None, 
-				dsrdtr=False, 
-				inter_byte_timeout=None, 
-				exclusive=None
-				)	
-			ser.write(b"UMO\n")			# asks for the device name
+			# try to get device name, if works, function generator connected	
+			ser.write(b"UMO\r\n")			# asks for the device name sometimes gives problems, ask 3 times
+			ser.write(b"UMO\r\n")
+			ser.write(b"UMO\r\n")
 			dev_name = ser.readline()
 			dev_name = str(dev_name)
-			print("this is the device name " + str(dev_name))
+			logging.debug("this is the device name " + str(dev_name))
 			if(dev_name.find("FY6800-40M") != -1):		## put the name of the device somewhere else
 				print("device found at " + port_name + " serial port")
+				ser.close()							# we will open the port creating a new serial object belinging to the class, so we close it here
 				return port_name
 
 
-	
 		
 	def set_serialport(self, port):
 		self.serial_port = port						# the port of this object, saves the value in port 
@@ -202,19 +204,30 @@ class fy6800:
 		
 	# WAVE #
 	
-	def get_wave(self, channel):
-		if channel == 0:
-			self.serialport 
-			return self.wave_a	
-		elif channel == 1:
-			return self.wave_b
-		
 	def set_wave(self, channel, wave):
 		if channel == 0:
+			message = "WMW"							# command to change weave channel 1
+			message = message + wave				# wave number
+			message = message + "\r\n"				# EOL, needed.
+			logging.debug("This is the message:" + str(message))
+			logging.debug("sending message to serial")
+			self.serial_port.write(bytes(message,'utf-8'))
 			self.wave_a = wave;
 			
 		elif channel == 1:
-			self.wave_b = wave;
+			pass
+	
+	
+	def get_wave(self, channel):
+		if channel == 0:
+			logging.debug("receiving message")
+			self.serial_port.write(b"RMW\r\n")
+			self.wave_a = self.serial_port.readline()				
+			logging.debug("returned wave: " + str(self.wave_a))
+			return self.wave_a	
+		elif channel == 1:
+			pass
+
 			
 		# add guards to be sure the wave value is between 0 and 97 ??? 
 		
