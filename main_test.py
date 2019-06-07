@@ -5,15 +5,13 @@
 from fy6800 import *
 
 
-port = "COM8"			# fixed com port for testing purposes 
-
 
 
 func_gen = fy6800()
 
 
 # get/set_serialport #
-func_gen.set_serialport(port)
+#func_gen.set_serialport(port)
 requested_port = (func_gen.get_serialport())
 print("Serial port of the functon generator: " + requested_port)
 
