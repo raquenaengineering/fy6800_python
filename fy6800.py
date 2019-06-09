@@ -202,32 +202,73 @@ class fy6800:
 	def get_serialport(self):
 		return(self.serial_port_name)
 		
+		
+	#NOTE: POSSIBLE TO WRITE AN EVEN MORE GENERIC FUNCTION FOR ALL COMMANDS
+	# it will only need to replace the 'W' parameter for the 'R', so it 
+	# will be useful for all commands RELATED WITH OUTPUT
+	# this MIGHT NOT WORK, because read commands need to wait for the returned data.
+	# PLEASE READ THE FY6800 COMMAND TABLE FOR MORE INFORMATION
+	
+		
+	# ~ #NOTE: GENERIC FUNCTION FOR ALL SET, AND GET#
+	# ~ most of the commands are doing almost the same,
+	# ~ so it's possible to create a common implementation for 
+	# ~ most of them together, the implementation will be similar to this:
+	
+	def set_param(self,channel,param_name,param_value):
+		if channel == 0:
+			chan = "M"
+		elif channel == 1:
+			chan = "F"
+		else:
+			print("ERROR: WRONG CHANNEL INDEX")
+		message = 'W' + chan + param_name + param_value 	# w indicates writing
+		message = message + "\r\n"				# EOL, needed.
+		logging.debug("This is the SENT message:" + str(message))
+		self.serial_port.write(bytes(message,'utf-8'))
+
+
+	def get_param(self,channel,param_name):
+		if channel == 0:
+			chan = "M"
+		elif channel == 1:
+			chan = "F"
+		else:
+			print("ERROR: WRONG CHANNEL INDEX")
+		message = 'R' + chan + param_name + param_value 	# w indicates writing
+		message = message + "\r\n"				# EOL, needed.
+		logging.debug("This is the SENT message:" + str(message))
+		# REQUEST THE PARAMETER #
+		self.serial_port.write(bytes(message,'utf-8'))
+		# READ THE REQUESTED PARAMETER #
+		param_value = self.serial_port.readline()	# reading incoming data 
+		logging.debug("This is the RECEIVED message:" + str(param_value))
+
+		return param_value
+	
+		
 	# WAVE #
 	
 	def set_wave(self, channel, wave):
-		if channel == 0:
-			message = "WMW"							# command to change weave channel 1
-			message = message + wave				# wave number
-			message = message + "\r\n"				# EOL, needed.
-			logging.debug("This is the message:" + str(message))
-			logging.debug("sending message to serial")
-			self.serial_port.write(bytes(message,'utf-8'))
-			self.wave_a = wave;
-			
-		elif channel == 1:
-			pass
-	
+		
+		#ADD GUARDS TO THE POSSIBLE VALUES, FOR EACH COMMAND#
+		# EXAMPLE:
+		#- Wave is between 0 and 97
+		#- Amplitude is between 0.0000001 and 10
+		#- duty is between 0 and 100
+		
+		self.set_param(channel,'W',wave)
+		self.wave_a = wave;
+
 	
 	def get_wave(self, channel):
 		if channel == 0:
-			logging.debug("receiving message")
-			self.serial_port.write(b"RMW\r\n")
-			self.wave_a = self.serial_port.readline()				
-			logging.debug("returned wave: " + str(self.wave_a))
-			return self.wave_a	
+			self.wave_a = self.get_param('M', 'W')
+			return self.wave_a
 		elif channel == 1:
-			pass
-
+			self.wave_b = self.get_param('F', 'W')
+			return self.wave_b
+		# owful implementation, improve this !!!
 			
 		# add guards to be sure the wave value is between 0 and 97 ??? 
 		
