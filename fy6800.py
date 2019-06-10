@@ -1,6 +1,13 @@
 
 # NOTE: \r\n are required as endline characters for the comminication to work
 # NOTE: it seems a pause between change in channels is required for the changes to work properly
+# NOTE: The fy6800 always replies with a b'/n' (EOL) character to every command, so:
+	# - either flush the input before every read	--> we will start here
+	# - read the input after every write, and use this as an ACK --> use this in the future
+	
+# NOTE: the wave adj-puls doesn't exist for channel 2, so this generates an offset in the naming of the 
+		# waves, so when ch2 is > 3, wave number = wave number -1		FIX THIS !!! 	
+	
 import serial
 import serial.tools.list_ports
 
@@ -229,20 +236,25 @@ class fy6800:
 
 
 	def get_param(self,channel,param_name):
+		logging.debug("Channel number is " + str(channel))
 		if channel == 0:
 			chan = "M"
 		elif channel == 1:
 			chan = "F"
 		else:
 			print("ERROR: WRONG CHANNEL INDEX")
-		message = 'R' + chan + param_name + param_value 	# w indicates writing
+		message = 'R' + chan + param_name 	 	# w indicates writing
 		message = message + "\r\n"				# EOL, needed.
 		logging.debug("This is the SENT message:" + str(message))
 		# REQUEST THE PARAMETER #
 		self.serial_port.write(bytes(message,'utf-8'))
 		# READ THE REQUESTED PARAMETER #
-		param_value = self.serial_port.readline()	# reading incoming data 
+		self.serial_port.reset_input_buffer()
+		param_value = self.serial_port.readline()	# first returned character is always '\n', so we need to read two lines
 		logging.debug("This is the RECEIVED message:" + str(param_value))
+		while(param_value == b'\n'):
+			param_value = self.serial_port.readline()	# this is actually the requested value
+			logging.debug("This is the RECEIVED message:" + str(param_value))
 
 		return param_value
 	
@@ -258,39 +270,39 @@ class fy6800:
 		#- duty is between 0 and 100
 		
 		self.set_param(channel,'W',wave)
-		self.wave_a = wave;
+		self.wave_a = wave;	# wrong !!!
 
 	
 	def get_wave(self, channel):
 		if channel == 0:
-			self.wave_a = self.get_param('M', 'W')
+			self.wave_a = self.get_param(0, 'W')
 			return self.wave_a
 		elif channel == 1:
-			self.wave_b = self.get_param('F', 'W')
+			self.wave_b = self.get_param(1, 'W')
 			return self.wave_b
 		# owful implementation, improve this !!!
-			
 		# add guards to be sure the wave value is between 0 and 97 ??? 
-		
-
 		
 		
 	#AMPLITUDE#
 	
 	def set_ampl(self, channel, ampl):
-		if channel == 0:
-			self.ampl_a = ampl;
-		elif channel == 1:
-			self.ampl_b = ampl;
+		
+		self.set_param(channel,'A',str(ampl))
+		self.ampl_a = ampl		# wrong !!!
+
 			
-		# add guards to be sure the wave value is between 0 and 97 ??? 
+		# add guards to be sure the wave value is between 0.000001 and 10 
 		
 	def get_ampl(self, channel):
 		if channel == 0:
-			return self.ampl_a	
+			self.ampl_a = self.get_param(0, 'W')
+			return self.ampl_a
 		elif channel == 1:
+			self.ampl_b = self.get_param(1, 'W')
 			return self.ampl_b
-			
+	
+	
 	
 	def set_offs(self):
 		pass
