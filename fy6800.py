@@ -13,7 +13,7 @@ import serial.tools.list_ports
 
 import time 
 import logging 	# an attempt to make debuggin easier 
-logging.basicConfig(level=logging.DEBUG)		# enable debug messages
+#logging.basicConfig(level=logging.DEBUG)		# enable debug messages
 separator = "---------------------------------------------------"	# to separate debugging messages
 
 # WAVEFORM LIST:
@@ -241,18 +241,39 @@ class fy6800:
 	# ~ so it's possible to create a common implementation for 
 	# ~ most of them together, the implementation will be similar to this:
 	
+	
+	# channel: type - integer: 0 or 1, only channel options
+	# param_name: type - UNICODE character, parameter to read/write to
+	# param_value: type - UNICODE character, value to write to the choosen parameter
+	
+	# RETURN VALUE: WRITE SUCCESSFUL 0
+	# 				WRITE FAIL -1
+	
+	# How to know if write success: read a '\n'
+	
 	def set_param(self,channel,param_name,param_value):
 		if channel == 0:
 			chan = "M"
 		elif channel == 1:
 			chan = "F"
 		else:
-			print("ERROR: WRONG CHANNEL INDEX")
+			print("ERROR: WRONG CHANNEL INDEX")				# HANDLE SOMEWHERE ELSE ???
 		message = 'W' + chan + param_name + param_value 	# w indicates writing
 		message = message + "\r\n"				# EOL, needed.
 		logging.debug("This is the SENT message:" + str(message))
 		self.serial_port.write(bytes(message,'utf-8'))
+		
+		response = self.serial_port.readline()
+		logging.debug("This is the response of the function generator: " + str(response))
+		if(response == b'\n'):	# the function generator always responses with b'\n' on succesful write
+			success = True		
+		else:
+			success = False
+			
+		return(success)
 
+
+	# RETURN VALUE: TYPE-UNICODE_STRING: parameter read from function generator
 
 	def get_param(self,channel,param_name):
 		logging.debug("Channel number is " + str(channel))
@@ -261,21 +282,28 @@ class fy6800:
 		elif channel == 1:
 			chan = "F"
 		else:
-			print("ERROR: WRONG CHANNEL INDEX")
+			print("ERROR: WRONG CHANNEL INDEX")	# HANDLE SOMEWHERE ELSE ???
 		message = 'R' + chan + param_name 	 	# w indicates writing
 		message = message + "\r\n"				# EOL, needed.
 		logging.debug("This is the SENT message:" + str(message))
 		# REQUEST THE PARAMETER #
 		self.serial_port.write(bytes(message,'utf-8'))
 		# READ THE REQUESTED PARAMETER #
-		self.serial_port.reset_input_buffer()
+		# self.serial_port.reset_input_buffer() NOT NEEDED !!! DELETE IF WORKING FINE
 		param_value = self.serial_port.readline()	# first returned character is always '\n', so we need to read two lines
 		logging.debug("This is the RECEIVED message:" + str(param_value))
-		while(param_value == b'\n'):
-			param_value = self.serial_port.readline()	# this is actually the requested value
-			logging.debug("This is the RECEIVED message:" + str(param_value))
-
-		return param_value
+		logging.debug("This is its type:")
+		logging.debug(type(param_value))
+		param_value = param_value.decode('utf8')		# converting binary value into UNICODE STRING
+		param_value = param_value.strip('\n')			# removing the END OF LINE character
+		logging.debug("This is the DECODED message:" + param_value)
+		logging.debug("This is its type")
+		logging.debug(type(param_value))
+		
+		response = self.serial_port.readline()
+		logging.debug(str(response))
+						
+		return param_value		# the return parameter is always a UNICODE string !!!
 	
 		
 	# WAVE #
@@ -288,46 +316,70 @@ class fy6800:
 		#- Amplitude is between 0.0000001 and 10
 		#- duty is between 0 and 100
 		
-		self.set_param(channel,'W',wave)
-		self.wave_a = wave;	# wrong !!!
+		logging.debug("set wave ----------------------------------------------")
+		
+		success = self.set_param(channel,'W',wave)	# returns true if succesful write
+		if channel == 0:
+			self.wave_a = wave	# wrong !!!
+		elif channel == 1:
+			self.wave_b = wave
+		else:
+			print("Selected channel not available");
+			print("Options are 0 and 1")
+				
+		return(success)
+
 
 	
 	def get_wave(self, channel):
+		
+		logging.debug("get wave ----------------------------------------------")
+
+		wave = None					# wave we get back
+		wave = self.get_param(channel,'W')
 		if channel == 0:
-			self.wave_a = self.get_param(0, 'W')
+			self.wave_a = wave
+			logging.debug("Wave in channel 0 = " + self.wave_a)
 			return self.wave_a
 		elif channel == 1:
-			self.wave_b = self.get_param(1, 'W')
+			self.wave_b = wave
+			logging.debug("Wave in channel 1 = " + self.wave_b)
 			return self.wave_b
 		# owful implementation, improve this !!!
 		# add guards to be sure the wave value is between 0 and 97 ??? 
 		
 		
-	#AMPLITUDE#
-	
-	def set_ampl(self, channel, ampl):
 		
-		self.set_param(channel,'A',str(ampl))
-		self.ampl_a = ampl		# wrong !!!
+	#FREQUENCY#
+	
+		
+		
+		
+	# #AMPLITUDE#
+	
+	# def set_ampl(self, channel, ampl):
+		
+		# self.set_param(channel,'A',str(ampl))
+		# self.ampl_a = ampl		# wrong !!!
 
 			
-		# add guards to be sure the wave value is between 0.000001 and 10 
+		# # add guards to be sure the wave value is between 0.000001 and 10 
 		
-	def get_ampl(self, channel):
-		if channel == 0:
-			self.ampl_a = self.get_param(0, 'W')
-			return self.ampl_a
-		elif channel == 1:
-			self.ampl_b = self.get_param(1, 'W')
-			return self.ampl_b
+	# def get_ampl(self, channel):
+		# if channel == 0:
+			# self.ampl_a = self.get_param(0, 'W')
+			# return self.ampl_a
+		# elif channel == 1:
+			# self.ampl_b = self.get_param(1, 'W')
+			# return self.ampl_b
 	
 	
 	
-	def set_offs(self):
-		pass
+	# def set_offs(self):
+		# pass
 		
-	def set_duty(self):
-		pass
+	# def set_duty(self):
+		# pass
 
 
 
