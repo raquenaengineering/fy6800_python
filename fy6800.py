@@ -166,6 +166,25 @@ class fy6800:
 			port_names.append(port[0])	# here all names get stored
 		logging.debug(port_names)
 		logging.debug("---------------------------------------------------")
+		
+		# Note: not all the ports are valid options, so we could discard the that aren't interesting USING THE DESCRIPTION!
+		port_descs = []
+		for port in ports:
+			port_descs.append(port[1])
+		logging.debug(port_descs)
+		logging.debug("---------------------------------------------------")
+		
+		
+		port_names = [] # destroy al previously printed port names, get only the ones that match description 
+		for port in ports:
+			port_desc = port[1]
+			if(port_desc.find("USB-SERIAL CH340") != -1):
+				port_names.append(port[0])	# here all names get stored
+		logging.debug(port_names)
+		logging.debug("---------------------------------------------------")
+
+		# Note:	use a timeout to avoid the serial detection to get stuck !!!
+			
 
 		for port_name in port_names:		# let's go through all ports
 			try:
