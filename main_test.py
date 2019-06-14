@@ -20,52 +20,74 @@ print("Serial port of the functon generator: " + requested_port)
 
 t = 0.5
 
-# set/get wave type #
 
-print("set/get wave")
+# set/get wave type -------------------------------------------------- #
 
-channel = 0
-success = func_gen.set_wave(channel,triangle)
-print("Succesful write? " + str(success))
-time.sleep(t)
+def set_get_wave_test():
 
-channel = 1
-func_gen.set_wave(channel,square)
-time.sleep(t)
+    print("set/get wave")
 
-channel = 0
-wave = func_gen.get_wave(channel)
-print("Wave number is: " + wave)
-time.sleep(t)
+    channel = 0
+    success = func_gen.set_wave(channel,triangle)
+    print("Succesful write? " + str(success))
+    time.sleep(t)
 
-channel = 1
-wave = func_gen.get_wave(channel)
-print("Wave number is: " + wave)
-time.sleep(t)
+    channel = 1
+    func_gen.set_wave(channel,square)
+    time.sleep(t)
 
+    channel = 0
+    wave = func_gen.get_wave(channel)
+    print("Wave number is: " + wave)
+    time.sleep(t)
 
-channel = 0
-success = func_gen.set_wave(channel,sine)
-print("Succesful write? " + str(success))
-time.sleep(t)
-
-channel = 1
-func_gen.set_wave(channel,sine)
-time.sleep(t)
+    channel = 1
+    wave = func_gen.get_wave(channel)
+    print("Wave number is: " + wave)
+    time.sleep(t)
 
 
-channel = 0
-wave = func_gen.get_wave(channel)
-print("Wave number is: " + wave)
-time.sleep(t)
+    channel = 0
+    success = func_gen.set_wave(channel,sine)
+    print("Succesful write? " + str(success))
+    time.sleep(t)
 
-channel = 1
-wave = func_gen.get_wave(channel)
-print("Wave number is: " + wave)
-time.sleep(t)
-
+    channel = 1
+    func_gen.set_wave(channel,sine)
+    time.sleep(t)
 
 
+    channel = 0
+    wave = func_gen.get_wave(channel)
+    print("Wave number is: " + wave)
+    time.sleep(t)
+
+    channel = 1
+    wave = func_gen.get_wave(channel)
+    print("Wave number is: " + wave)
+    time.sleep(t)
+
+# set/get frequency -------------------------------------------------- #
+
+def set_get_freq_test():
+    print("set/get frequency")
+
+    channel = 0
+    success = func_gen.set_freq(channel,100)
+    print("Succesful write? " + str(success))
+    time.sleep(t)
+
+    channel = 1
+    func_gen.set_freq(channel,0.5)
+    time.sleep(t)
+
+# -------------------------------------------------------------------- #
+
+if __name__ == "__main__":
+    
+    #set_get_wave_test()        ## wave changing test
+    set_get_freq_test()
+    
 
 ## amplitude get set testing ##
 

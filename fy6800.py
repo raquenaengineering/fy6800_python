@@ -13,7 +13,7 @@ import serial.tools.list_ports
 
 import time 
 import logging 	# an attempt to make debuggin easier 
-#logging.basicConfig(level=logging.DEBUG)		# enable debug messages
+logging.basicConfig(level=logging.DEBUG)		# enable debug messages
 separator = "---------------------------------------------------"	# to separate debugging messages
 
 # WAVEFORM LIST:
@@ -178,7 +178,9 @@ class fy6800:
 		port_names = [] # destroy al previously printed port names, get only the ones that match description 
 		for port in ports:
 			port_desc = port[1]
-			if(port_desc.find("USB-SERIAL CH340") != -1):
+			if(port_desc.find("USB-SERIAL CH340") != -1):	# WINDOWS DESCRIPTION FOR CH340
+				port_names.append(port[0])	# here all names get stored
+			if(port_desc.find("USB2.0-Serial") != -1):		# LINUX DESCRIPTION FOR CH340
 				port_names.append(port[0])	# here all names get stored
 		logging.debug(port_names)
 		logging.debug("---------------------------------------------------")
@@ -257,8 +259,8 @@ class fy6800:
 		elif channel == 1:
 			chan = "F"
 		else:
-			print("ERROR: WRONG CHANNEL INDEX")				# HANDLE SOMEWHERE ELSE ???
-		message = 'W' + chan + param_name + param_value 	# w indicates writing
+			print("ERROR: WRONG CHANNEL INDEX")					# HANDLE SOMEWHERE ELSE ???
+		message = 'W' + chan + param_name + str(param_value) 	# w indicates writing
 		message = message + "\r\n"				# EOL, needed.
 		logging.debug("This is the SENT message:" + str(message))
 		self.serial_port.write(bytes(message,'utf-8'))
@@ -352,7 +354,31 @@ class fy6800:
 		
 	#FREQUENCY#
 	
+	def set_freq(self, channel, freq):
+		# NOTE: This is always the format for the frequency value "00000010,000000"
+		logging.debug("set frequency ----------------------------------------------")
 		
+		freq_int = int(freq)
+		logging.debug(str(freq_int))
+		freq_float = freq - int(freq)
+		logging.debug(str(freq_float))
+		logging.debug("This is the frequency current format:")
+
+		frequency = str(freq)
+		logging.debug("This is the frequency current format:")
+		print(frequency)
+		
+		frequency.replace(',','.')
+		logging.debug("This is the frequency current format:")
+		print(frequency)
+		
+		success = self.set_param(channel,'F',frequency)	# returns true if succesful write
+		if channel == 0:
+			self.freq_a = freq
+		elif channel == 1:
+			self.freq_b = freq
+
+		return(success)								# return if setting frequency was succesful
 		
 		
 	# #AMPLITUDE#
