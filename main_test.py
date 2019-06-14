@@ -3,9 +3,7 @@
 
 
 from fy6800 import *
-
-
-
+import time 
 
 func_gen = fy6800()
 
@@ -20,12 +18,78 @@ print("Serial port of the functon generator: " + requested_port)
 #port = func_gen.autodetect_port()
 
 
+t = 0.5
+
 # set/get wave type #
 
 print("set/get wave")
 
 channel = 0
-func_gen.set_wave(channel,triangle)
+success = func_gen.set_wave(channel,triangle)
+print("Succesful write? " + str(success))
+time.sleep(t)
+
+channel = 1
+func_gen.set_wave(channel,square)
+time.sleep(t)
+
+channel = 0
+wave = func_gen.get_wave(channel)
+print("Wave number is: " + wave)
+time.sleep(t)
+
+channel = 1
+wave = func_gen.get_wave(channel)
+print("Wave number is: " + wave)
+time.sleep(t)
+
+
+channel = 0
+success = func_gen.set_wave(channel,sine)
+print("Succesful write? " + str(success))
+time.sleep(t)
+
+channel = 1
+func_gen.set_wave(channel,sine)
+time.sleep(t)
+
+
+channel = 0
+wave = func_gen.get_wave(channel)
+print("Wave number is: " + wave)
+time.sleep(t)
+
+channel = 1
+wave = func_gen.get_wave(channel)
+print("Wave number is: " + wave)
+time.sleep(t)
+
+
+
+
+## amplitude get set testing ##
+
+# channel = 0;
+# func_gen.set_ampl(channel, 0.010)
+# time.sleep(t)
+
+
+# channel = 1;
+# func_gen.set_ampl(channel, 0.010)
+# time.sleep(t)
+
+
+## frequency get set testing ##
+
+# channel = 0;
+# func_gen.set_freq(channel, 100)
+# time.sleep(t)
+
+
+# channel = 1;
+# func_gen.set_freq(channel, 100)
+# time.sleep(t)
+
 
 #req_wave = func_gen.get_wave(channel)
 
