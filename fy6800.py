@@ -310,6 +310,7 @@ class fy6800:
 		
 	# WAVE #
 	
+	
 	def set_wave(self, channel, wave):
 		
 		#ADD GUARDS TO THE POSSIBLE VALUES, FOR EACH COMMAND#
@@ -354,25 +355,32 @@ class fy6800:
 		
 	#FREQUENCY#
 	
+	def format_freq(self,freq):
+				
+		## formatting the string to meet the requirements of the func.gen
+		## change this to a function ??? YES, WILL BE USED MORE THAN ONCE
+		
+		# "{:(zero padding)(total number of digits).(digits after comma)}"
+		freq_string =("{:015.6f}".format(freq))
+		freq_string = freq_string.replace('.','')
+		logging.debug("The formatted freq_string is:	" + freq_string)
+		return(freq_string)
+    
+	
 	def set_freq(self, channel, freq):
-		# NOTE: This is always the format for the frequency value "00000010,000000"
+		# NOTE: This is always the format for the frequency value "00000010(,)000000" the comma is NOT needed
 		logging.debug("set frequency ----------------------------------------------")
 		
-		freq_int = int(freq)
-		logging.debug(str(freq_int))
-		freq_float = freq - int(freq)
-		logging.debug(str(freq_float))
-		logging.debug("This is the frequency current format:")
+		if (freq > 40000000) or (freq < 0):		# guards to limit the input value range	# NEEDS TO BE CHANGEABLE !!!
+			print("Frequency value out of range!!! (0.0000001 -- 40.000.000)")
+			return(False)						# we will not set freq if out of range, and we return fail
 
-		frequency = str(freq)
-		logging.debug("This is the frequency current format:")
-		print(frequency)
+		freq_string = self.format_freq(freq)	# formatting the string to meet the requirements of the func.gen
+
 		
-		frequency.replace(',','.')
-		logging.debug("This is the frequency current format:")
-		print(frequency)
+
 		
-		success = self.set_param(channel,'F',frequency)	# returns true if succesful write
+		success = self.set_param(channel,'F',freq_string)	# returns true if succesful write
 		if channel == 0:
 			self.freq_a = freq
 		elif channel == 1:
