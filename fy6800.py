@@ -79,6 +79,9 @@ class fy6800:
 	wave_a = None;		# current wave (only matching with device if not modified directly at the device )	
 	wave_b = None;
 	
+	freq_a = None;		# current wave (only matching with device if not modified directly at the device )	
+	freq_b = None;
+	
 	ampl_a = None;		# current wave (only matching with device if not modified directly at the device )	
 	ampl_b = None;
 
@@ -151,7 +154,38 @@ class fy6800:
 		# returns the first instance of a fy6800		
 		
 		
+	# prints all current parameters of the function generator
 		
+	def print_params(self):
+		
+		print("Serial Port: ")
+		print(self.serial_port_name)
+		# waves #
+		print("Wave Channel A: ")
+		print(self.wave_a)
+		print("Wave Channel B: ")
+		print(self.wave_b)
+		#frequency#
+		print("Frequency Channel A: ")
+		print(self.freq_a)
+		print("Frequency Channel B: ")
+		print(self.freq_b)			
+		#Amplitude#
+		print("Amplitude Channel A: ")
+		print(self.ampl_a)	
+		print("Amplitude Channel B: ")
+		print(self.ampl_b)			
+		#Offset#
+		print("Offset Channel A: ")
+		print(self.offs_a)	
+		print("Offset Channel B: ")
+		print(self.offs_b)	
+		#Duty#
+		print("Duty Channel A: ")
+		print(self.duty_a)	
+		print("Duty Channel B: ")
+		print(self.duty_b)			
+
 		
 	def autodetect_serialport(self):			# for methods, self need to be always given as a parameter.
 		
@@ -378,8 +412,6 @@ class fy6800:
 		freq_string = self.format_freq(freq)	# formatting the string to meet the requirements of the func.gen
 
 		
-
-		
 		success = self.set_param(channel,'F',freq_string)	# returns true if succesful write
 		if channel == 0:
 			self.freq_a = freq
@@ -388,6 +420,23 @@ class fy6800:
 
 		return(success)								# return if setting frequency was succesful
 		
+	def get_freq(self, channel):
+		logging.debug("get frequency  ----------------------------------------------")
+
+		freq = None					# wave we get back
+		freq = self.get_param(channel,'F')
+		
+		# converting back string to integer number#
+		freq = float(freq)
+		if channel == 0:
+			self.freq_a = freq
+			logging.debug("Frequency in channel 0 = " + str(self.freq_a))
+			return self.freq_a
+		elif channel == 1:
+			self.freq_b = freq
+			logging.debug("Frequency in channel 1 = " + str(self.freq_b))
+			return self.freq_b
+
 		
 	# #AMPLITUDE#
 	
