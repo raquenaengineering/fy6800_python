@@ -449,21 +449,48 @@ class fy6800:
 		
 	# #AMPLITUDE#
 	
-	# def set_ampl(self, channel, ampl):
+	def set_ampl(self, channel, ampl):
+		logging.debug("set amplitude ----------------------------------------------")
+		# NOTE: THE ORIGINAL SOFTWARE DOESN'T WORK PROPERLY !!!!
+		# It only allows you to set integer amplitude values by serial
+		# probably because the separator is a ',', instead of a '.' (this software uses the .)
 		
-		# self.set_param(channel,'A',str(ampl))
-		# self.ampl_a = ampl		# wrong !!!
+		# NOTE: THE FIRMWARE MAY ALSO BE BROKEN, NOT POSSIBLE AMPLITUDES BELOW 0.001 
+		# (0.0001 is selectable directly using the machine knobs)
+		# using a number with not only zeroes it works !!!
+		# example: 1.2405V
+		# 0.0045 is a value the device doesn't like, it always gets 0.0044 instead !!!
+		# (not tested if indeed working)
+		
 
-			
-		# # add guards to be sure the wave value is between 0.000001 and 10 
+		if (ampl > 20) or (ampl < 0):			# guards to limit the input value range	# NEEDS TO BE CHANGEABLE !!!
+			print("Frequency value out of range!!! (0.001 -- 20) *1:read note in code")
+			return(False)						# we will not set freq if out of range, and we return fail
+
+		ampl_string = str(ampl)					# this is all formatting needed for the amplitude
 		
-	# def get_ampl(self, channel):
-		# if channel == 0:
-			# self.ampl_a = self.get_param(0, 'W')
-			# return self.ampl_a
-		# elif channel == 1:
-			# self.ampl_b = self.get_param(1, 'W')
-			# return self.ampl_b
+		success = self.set_param(channel,'A',ampl_string)	# returns true if succesful write
+		if channel == 0:
+			self.ampl_a = ampl
+		elif channel == 1:
+			self.ampl_b = ampl
+
+		return(success)								# return if setting frequency was succesful
+		
+	def get_ampl(self, channel):
+			
+		 if channel == 0:
+			 ampl = self.get_param(0, 'A')
+			 ampl = float(ampl) 			# convert the amplutude to a floating value
+			 ampl = ampl/10000				# put the decimals at the right place
+			 self.ampl_a = ampl
+			 return self.ampl_a
+		 elif channel == 1:
+			 ampl = self.get_param(1, 'A')
+			 ampl = float(ampl)				# convert to float
+			 ampl = ampl/10000				# numbers returned are always 4 decimal digits swapped
+			 self.ampl_b = ampl
+			 return self.ampl_b
 	
 	
 	
