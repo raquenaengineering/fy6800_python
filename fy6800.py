@@ -18,12 +18,12 @@ separator = "---------------------------------------------------"	# to separate 
 
 # WAVEFORM LIST:
 
-sine = "0"
-square = "1"
-cmos = "2"
-adj_pulse = "3"
-dc = "4"
-triangle = "5" 
+sine = 0
+square = 1
+cmos = 2
+adj_pulse = 3
+dc = 4
+triangle = 5 
 
 # 0 : sine 
 # 1: square
@@ -354,6 +354,15 @@ class fy6800:
 		#- duty is between 0 and 100
 		
 		logging.debug("set wave ----------------------------------------------")
+		
+		# fixing STUPID wave offset problem between channels
+		
+		if(wave == 3 and channel == 1):
+			print("Channel B has no adjustable pulse wave available, SEE SPECS !!!")
+			return(False)
+			
+		if(wave > 3 and channel == 1):
+			wave = wave - 1
 		
 		success = self.set_param(channel,'W',wave)	# returns true if succesful write
 		if channel == 0:
