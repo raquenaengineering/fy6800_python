@@ -464,7 +464,7 @@ class fy6800:
 		
 
 		if (ampl > 20) or (ampl < 0):			# guards to limit the input value range	# NEEDS TO BE CHANGEABLE !!!
-			print("Frequency value out of range!!! (0.001 -- 20) *1:read note in code")
+			print("Amplitude value out of range!!! (0.001 -- 20) *1:read note in code")
 			return(False)						# we will not set freq if out of range, and we return fail
 
 		ampl_string = str(ampl)					# this is all formatting needed for the amplitude
@@ -478,24 +478,56 @@ class fy6800:
 		return(success)								# return if setting frequency was succesful
 		
 	def get_ampl(self, channel):
-			
-		 if channel == 0:
-			 ampl = self.get_param(0, 'A')
-			 ampl = float(ampl) 			# convert the amplutude to a floating value
-			 ampl = ampl/10000				# put the decimals at the right place
-			 self.ampl_a = ampl
-			 return self.ampl_a
-		 elif channel == 1:
-			 ampl = self.get_param(1, 'A')
-			 ampl = float(ampl)				# convert to float
-			 ampl = ampl/10000				# numbers returned are always 4 decimal digits swapped
-			 self.ampl_b = ampl
-			 return self.ampl_b
+		logging.debug("get amplitude ----------------------------------------------")
+		if channel == 0:
+			ampl = self.get_param(0, 'A')
+			ampl = float(ampl) 			# convert the amplitude to a floating value
+			ampl = ampl/10000				# put the decimals at the right place
+			self.ampl_a = ampl
+			return self.ampl_a
+		elif channel == 1:
+			ampl = self.get_param(1, 'A')
+			ampl = float(ampl)				# convert to float
+			ampl = ampl/10000				# numbers returned are always 4 decimal digits swapped
+			self.ampl_b = ampl
+			return self.ampl_b
 	
 	
 	
-	# def set_offs(self):
-		# pass
+	def set_offs(self,channel,offs):
+		logging.debug("set Offset ----------------------------------------------")
+		
+		if (offs > 10) or (offs < -10):			# guards to limit the input value range	# NEEDS TO BE CHANGEABLE !!!
+			print("Offset value out of range!!! [-10:10] (|offs|>0.001) *2:read note in code")
+			return(False)						# we will not set freq if out of range, and we return fail
+
+		offs_string = str(offs)					# this is all formatting needed for the amplitude
+		
+		success = self.set_param(channel,'O',offs_string)	# returns true if succesful write
+		if channel == 0:
+			self.offs_a = offs
+		elif channel == 1:
+			self.offs_b = offs
+
+		return(success)								# return if setting frequency was succesful		
+		
+	def get_offs(self,channel):
+		logging.debug("Get Offset ----------------------------------------------")
+		if channel == 0:
+			offs = self.get_param(0, 'O')
+			offs = float(offs) 			# convert the OFFSET to a floating value
+			offs = offs/1000				# put the decimals at the right place
+			self.offs_a = offs
+			return self.offs_a
+		elif channel == 1:
+			offs = self.get_param(1, 'O')
+			offs = float(offs)				# convert to float
+			offs = offs/1000				# numbers returned are always 4 decimal digits swapped
+			self.offs_b = offs
+			return self.offs_b		
+		
+		
+		
 		
 	# def set_duty(self):
 		# pass
