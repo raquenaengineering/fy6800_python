@@ -5,21 +5,25 @@
 from fy6800 import *
 import time 
 
-func_gen = fy6800()
 
 
-# get/set_serialport #
-#func_gen.set_serialport(port)
-requested_port = (func_gen.get_serialport())
-print("Serial port of the functon generator: " + requested_port)
 
+## get/set_serialport #
+##func_gen.set_serialport(port)
+#requested_port = (func_gen.get_serialport())
+#print("Serial port of the functon generator: ")
+#print(requested_port)
 
-#autodetect serial port #
-#port = func_gen.autodetect_port()
+##autodetect serial port #
+##port = func_gen.autodetect_port()
 
 
 t = 0.5
 
+# Basic setup to connect to the fy6800-------------------------------- #
+
+def fy6800_setup():
+    pass
 
 # set/get wave type -------------------------------------------------- #
 
@@ -73,12 +77,12 @@ def set_get_freq_test():
     print("set/get frequency")
 
     channel = 0
-    success = func_gen.set_freq(channel,50.50)
+    success = func_gen.set_freq(channel,200)
     print("Succesful write? " + str(success))
     time.sleep(t)
 
     channel = 1
-    func_gen.set_freq(channel,0.4)
+    func_gen.set_freq(channel,250)
     time.sleep(t)
     
     channel = 0
@@ -147,8 +151,10 @@ def set_get_offset_test():
 
 if __name__ == "__main__":
     
-    #set_get_wave_test()        ## wave changing test
-    #set_get_freq_test()
+    func_gen = fy6800(serial_port_name = "/dev/ttyUSB0")
+    
+    set_get_wave_test()        ## wave changing test
+    set_get_freq_test()
     set_get_ampl_test()
     set_get_offset_test()
     

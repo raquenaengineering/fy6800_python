@@ -96,58 +96,57 @@ class fy6800:
 	# here all the METHODS for the classe fy6800 #######################
 	
 	# constructor with serial port defined manually # 
-		 
-	def __init__(self, serial_port_name):
-			
+	
 		# if no port is given as a parameter, autodetect serial port 
 		
-		# if port is given as parameter, use it 
-		self.serial_port = serial_port_name
-		
-		# open communication 
-		self.serial_port = serial.Serial(		# serial constructor
-							port=port_name, 
-							baudrate=115200, 
-							#bytesize=EIGHTBITS, 
-							#parity=PARITY_NONE, 
-							#stopbits=STOPBITS_ONE, 
-							timeout=None, 
-							xonxoff=False, 
-							rtscts=False, 
-							write_timeout=None, 
-							dsrdtr=False, 
-							inter_byte_timeout=None, 
-							exclusive=None
-							)
-		
+
 		# checks all serial ports
 		# sends a message to check if there's a fy6800 connected
 		# returns the first instance of a fy6800
 		
 		
-	def __init__(self):
-		logging.debug("Init")
-		# if no port is given as a parameter, autodetect serial port 
-		# if port is given as parameter, use it 
-		self.serial_port_name = self.autodetect_serialport()
-		# open communication 
-		logging.debug("opening the port with the name obtained with autodetect")
-		# open communication 
-		self.serial_port = serial.Serial(		# serial constructor
-							port=self.serial_port_name, 
-							baudrate=115200, 
-							#bytesize=EIGHTBITS, 
-							#parity=PARITY_NONE, 
-							#stopbits=STOPBITS_ONE, 
-							timeout=None, 
-							xonxoff=False, 
-							rtscts=False, 
-							write_timeout=None, 
-							dsrdtr=False, 
-							inter_byte_timeout=None, 
-							exclusive=None
-							)		
-		logging.debug("open success")
+	def __init__(self, serial_port_name = None):
+		
+		logging.debug("__init__ method called")
+
+
+		if(serial_port_name != None):		
+			self.serial_port_name = serial_port_name
+			logging.debug('self.serial_port_name:')
+			logging.debug(self.serial_port_name)		
+		else:
+			# if no port is given as a parameter, autodetect serial port 
+			self.serial_port_name = self.autodetect_serialport()
+			logging.debug("Serial port autodetect finished")
+			logging.debug("Name of the serial port where the function generator is located:")
+			logging.debug(self.serial_port_name)
+			# open communication 
+			logging.debug("opening the port with the name obtained with autodetect")
+			# open communication 
+	
+			
+		# try to connect to the designated serial port				
+		try:
+			self.serial_port = serial.Serial(		# serial constructor
+								port=self.serial_port_name, 
+								baudrate=115200, 
+								#bytesize=EIGHTBITS, 
+								#parity=PARITY_NONE, 
+								#stopbits=STOPBITS_ONE, 
+								timeout=None, 
+								xonxoff=False, 
+								rtscts=False, 
+								write_timeout=None, 
+								dsrdtr=False, 
+								inter_byte_timeout=None, 
+								#exclusive=None		# this argument seems problematic under linux
+								)
+			
+		except:
+			logging.error("failed to open the signal generator Serial port")		
+
+		if(self.serial_port.is_open == True):
+			logging.debug("open success")
 		
 		# checks all serial ports
 		# sends a message to check if there's a fy6800 connected
@@ -189,12 +188,14 @@ class fy6800:
 		
 	def autodetect_serialport(self):			# for methods, self need to be always given as a parameter.
 		
-		logging.debug('Running autodetect_serialport')
+		logging.debug('autodetect_serialport method called')
 		serial_port = None
 		ports = list(serial.tools.list_ports.comports())
+		logging.debug("List of available serial ports:")
 		for p in ports:
 			logging.debug(p)
 		logging.debug("---------------------------------------------------")
+		logging.debug("Serial port names:")
 		port_names = []		# we store all port names in this variable
 		for port in ports:
 			port_names.append(port[0])	# here all names get stored
@@ -202,6 +203,7 @@ class fy6800:
 		logging.debug("---------------------------------------------------")
 		
 		# Note: not all the ports are valid options, so we could discard the that aren't interesting USING THE DESCRIPTION!
+		logging.debug("Serial port descriptions:")
 		port_descs = []
 		for port in ports:
 			port_descs.append(port[1])
@@ -210,6 +212,7 @@ class fy6800:
 		
 		
 		port_names = [] # destroy al previously printed port names, get only the ones that match description 
+		logging.debug("Ports which potentially signal generators:")
 		for port in ports:
 			port_desc = port[1]
 			if(port_desc.find("USB-SERIAL CH340") != -1):	# WINDOWS DESCRIPTION FOR CH340
@@ -240,21 +243,26 @@ class fy6800:
 					)
 				print("Serial Port " + port_name + " Open succesfuly")
 			except:
-				print("Serial Port " + port_name + " Failed to open")	
-				ser.close()
+				logging.warning("Serial Port " + port_name + " Failed to open")	
+				#ser.close()
 
-				
-			# try to get device name, if works, function generator connected	
-			ser.write(b"UMO\r\n")			# asks for the device name sometimes gives problems, ask 3 times
-			ser.write(b"UMO\r\n")
-			ser.write(b"UMO\r\n")
-			dev_name = ser.readline()
-			dev_name = str(dev_name)
-			logging.debug("this is the device name " + str(dev_name))
-			if(dev_name.find("FY6800-40M") != -1):		## put the name of the device somewhere else
-				print("device found at " + port_name + " serial port")
-				ser.close()							# we will open the port creating a new serial object belinging to the class, so we close it here
-				return port_name
+			try:
+				# try to get device name, if works, function generator connected	
+				ser.write(b"UMO\r\n")			# asks for the device name sometimes gives problems, ask 3 times
+				ser.write(b"UMO\r\n")
+				ser.write(b"UMO\r\n")
+				dev_name = ser.readline()
+				logging.debug("readed from serial port:")
+				logging.debug(dev_name)
+				dev_name = str(dev_name)
+				slogging.debug("this is the device name " + str(dev_name))
+				if(dev_name.find("FY6800-40M") != -1):		## put the name of the device somewhere else
+					print("device found at " + port_name + " serial port")
+					ser.close()							# we will open the port creating a new serial object belinging to the class, so we close it here
+					return port_name				
+					
+			except:
+				logging.warning("Failed to send commands to serial device, is the port open?")
 
 
 		
