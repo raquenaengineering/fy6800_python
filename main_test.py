@@ -32,12 +32,12 @@ def set_get_wave_test():
     print("set/get wave")
 
     channel = 0
-    success = func_gen.set_wave(channel,sine)
+    success = func_gen.set_wave(channel,SINE)
     print("Succesful write? " + str(success))
     time.sleep(t)
 
     channel = 1
-    func_gen.set_wave(channel,sine)
+    func_gen.set_wave(channel,SINE)
     time.sleep(t)
 
     channel = 0
@@ -52,12 +52,12 @@ def set_get_wave_test():
 
 
     channel = 0
-    success = func_gen.set_wave(channel,triangle)
+    success = func_gen.set_wave(channel,SINE)
     print("Succesful write? " + str(success))
     time.sleep(t)
 
     channel = 1
-    func_gen.set_wave(channel,triangle)
+    func_gen.set_wave(channel,SINE)
     time.sleep(t)
 
 
@@ -77,12 +77,12 @@ def set_get_freq_test():
     print("set/get frequency")
 
     channel = 0
-    success = func_gen.set_freq(channel,200)
+    success = func_gen.set_freq(channel,10)
     print("Succesful write? " + str(success))
     time.sleep(t)
 
     channel = 1
-    func_gen.set_freq(channel,250)
+    func_gen.set_freq(channel,10)
     time.sleep(t)
     
     channel = 0
@@ -102,12 +102,12 @@ def set_get_ampl_test():
     print("set/get Amplitude")
 
     channel = 0
-    success = func_gen.set_ampl(channel,0.0042)
+    success = func_gen.set_ampl(channel,0.015)
     print("Succesful write? " + str(success))
     time.sleep(t)
     
     channel = 1
-    success = func_gen.set_ampl(channel,1.90)
+    success = func_gen.set_ampl(channel,0.015)
     print("Succesful write? " + str(success))
     time.sleep(t)
 
@@ -128,12 +128,12 @@ def set_get_offset_test():
     print("set/get Offset")
 
     channel = 0
-    success = func_gen.set_offs(channel,-5)
+    success = func_gen.set_offs(channel,0)
     print("Succesful write? " + str(success))
     time.sleep(t)
     
     channel = 1
-    success = func_gen.set_offs(channel,-0.001)
+    success = func_gen.set_offs(channel,0)
     print("Succesful write? " + str(success))
     time.sleep(t)
 
@@ -146,6 +146,34 @@ def set_get_offset_test():
     ampl = func_gen.get_offs(channel)
     print("Obtained offset value: " + str(ampl) + "V")
     time.sleep(t)
+
+# set/get Phase  -------------------------------------------------- #
+
+def set_get_phase_test():
+    print("set/get Phase")
+
+    channel = 0
+    success = func_gen.set_phas(channel,90)
+    print("Succesful write? " + str(success))
+    time.sleep(t)
+    
+    channel = 1
+    success = func_gen.set_phas(channel,270)
+    print("Succesful write? " + str(success))
+    time.sleep(t)
+
+    channel = 0
+    phas = func_gen.get_phas(channel)
+    print("Obtained Phase value: " + str(phas) + "º")
+    time.sleep(t)
+    
+    channel = 1
+    phas = func_gen.get_phas(channel)
+    print("Obtained Phase value: " + str(phas) + "º")
+    time.sleep(t)
+    
+
+
 # -------------------------------------------------------------------- #
 
 
@@ -158,6 +186,8 @@ if __name__ == "__main__":
     set_get_freq_test()
     set_get_ampl_test()
     set_get_offset_test()
+    
+    set_get_phase_test()
     
     
     func_gen.print_params()

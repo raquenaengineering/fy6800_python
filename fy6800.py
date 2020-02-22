@@ -18,12 +18,12 @@ separator = "---------------------------------------------------"	# to separate 
 
 # WAVEFORM LIST:
 
-sine = 0
-square = 1
-cmos = 2
-adj_pulse = 3
-dc = 4
-triangle = 5 
+SINE = 0
+SQUARE = 1
+CMOS = 2
+ADJ_PULSE = 3
+DC = 4
+TRIANGLE = 5 
 
 # 0 : sine 
 # 1: square
@@ -189,7 +189,11 @@ class fy6800:
 		print(self.duty_a)	
 		print("Duty Channel B: ")
 		print(self.duty_b)			
-
+		#Duty#
+		print("Phase Channel A: ")
+		print(self.phas_a)	
+		print("Phase Channel B: ")
+		print(self.phas_b)	
 		
 	def autodetect_serialport(self):			# for methods, self need to be always given as a parameter.
 		
@@ -379,7 +383,9 @@ class fy6800:
 		# EXAMPLE:
 		#- Wave is between 0 and 97
 		#- Amplitude is between 0.0000001 and 10
+		#- offset is in range [-10:10], with 3 decimals resolution.
 		#- duty is between 0 and 100
+		#- phase is between 0 and 360, 3 decimals
 		
 		logging.debug("set wave ----------------------------------------------")
 		
@@ -554,7 +560,37 @@ class fy6800:
 			self.offs_b = offs
 			return self.offs_b		
 		
+	def set_phas(self,channel,phas):
+		logging.debug("set Phase -----------------------------------------------")
 		
+		if (phas > 360) or (phas < 0):			# guards to limit the input value range	# NEEDS TO BE CHANGEABLE !!!
+			print("PHASE value out of range!!! [0:360] (phas>0.001) *2:read note in code")
+			return(False)						# we will not set freq if out of range, and we return fail
+
+		phas_string = str(phas)					# this is all formatting needed for the amplitude
+		
+		success = self.set_param(channel,'P',phas_string)	# returns true if succesful write
+		if channel == 0:
+			self.phas_a = phas
+		elif channel == 1:
+			self.phas_b = phas
+
+	def get_phas(self,channel):
+		logging.debug("Get Offset ----------------------------------------------")
+		if channel == 0:
+			phas = self.get_param(0, 'P')
+			phas = float(phas) 			# convert the OFFSET to a floating value
+			phas = phas/1000			# put the decimals at the right place
+			self.phas_a = phas
+			return self.phas_a
+		elif channel == 1:
+			phas = self.get_param(1, 'P')
+			phas = float(phas)			# convert to float
+			phas = phas/1000			# numbers returned are always 4 decimal digits swapped
+			self.phas_b = phas
+			return self.phas_b		
+		
+
 		
 		
 	# def set_duty(self):
