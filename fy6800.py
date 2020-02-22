@@ -79,18 +79,20 @@ class fy6800:
 	wave_a = None;		# current wave (only matching with device if not modified directly at the device )	
 	wave_b = None;
 	
-	freq_a = None;		# current wave (only matching with device if not modified directly at the device )	
+	freq_a = None;		# 	
 	freq_b = None;
 	
-	ampl_a = None;		# current wave (only matching with device if not modified directly at the device )	
+	ampl_a = None;		# 	
 	ampl_b = None;
 
-	offs_a = None;		# current wave (only matching with device if not modified directly at the device )	
+	offs_a = None;		# 
 	offs_b = None;
 	
-	duty_a = None;		# current wave (only matching with device if not modified directly at the device )	
+	duty_a = None;		#
 	duty_b = None;	
 
+	phas_a = None;		# phase for each channel
+	phas_b = None;
 
 
 	# here all the METHODS for the classe fy6800 #######################
@@ -107,8 +109,8 @@ class fy6800:
 		
 	def __init__(self, serial_port_name = None):
 		
-		logging.debug("__init__ method called")
-
+		logging.debug("__init__ method called:")
+		logging.debug(separator)
 
 		if(serial_port_name != None):		
 			self.serial_port_name = serial_port_name
@@ -157,6 +159,9 @@ class fy6800:
 		
 	def print_params(self):
 		
+		logging.debug("print_params method called:")
+		logging.debug(separator)
+		
 		print("Serial Port: ")
 		print(self.serial_port_name)
 		# waves #
@@ -189,6 +194,8 @@ class fy6800:
 	def autodetect_serialport(self):			# for methods, self need to be always given as a parameter.
 		
 		logging.debug('autodetect_serialport method called')
+		logging.debug(separator)
+		
 		serial_port = None
 		ports = list(serial.tools.list_ports.comports())
 		logging.debug("List of available serial ports:")
@@ -210,11 +217,10 @@ class fy6800:
 		logging.debug(port_descs)
 		logging.debug("---------------------------------------------------")
 		
-		
+		logging.debug("Discarding ports with the wrong description (USB-serial...): ")
 		port_names = [] # destroy al previously printed port names, get only the ones that match description 
-		logging.debug("Ports which potentially signal generators:")
 		for port in ports:
-			port_desc = port[1]
+			port_desc = port[1]		
 			if(port_desc.find("USB-SERIAL CH340") != -1):	# WINDOWS DESCRIPTION FOR CH340
 				port_names.append(port[0])	# here all names get stored
 			if(port_desc.find("USB2.0-Serial") != -1):		# LINUX DESCRIPTION FOR CH340
@@ -224,8 +230,12 @@ class fy6800:
 
 		# Note:	use a timeout to avoid the serial detection to get stuck !!!
 			
+		logging.debug("Opening non discarded serial ports, and requesting device model")
 
 		for port_name in port_names:		# let's go through all ports
+			
+			logging.debug(port_names)
+			
 			try:
 				ser = serial.Serial(		# serial constructor
 					port=port_name, 
@@ -251,18 +261,20 @@ class fy6800:
 				ser.write(b"UMO\r\n")			# asks for the device name sometimes gives problems, ask 3 times
 				ser.write(b"UMO\r\n")
 				ser.write(b"UMO\r\n")
-				dev_name = ser.readline()
-				logging.debug("readed from serial port:")
-				logging.debug(dev_name)
-				dev_name = str(dev_name)
-				slogging.debug("this is the device name " + str(dev_name))
-				if(dev_name.find("FY6800-40M") != -1):		## put the name of the device somewhere else
+			except:
+				logging.warning("Failed to send commands to serial device, is the port open?")
+				
+			dev_name = ser.readline()
+			logging.debug("readed from serial port:")
+			logging.debug(dev_name)
+			dev_name = str(dev_name)
+			logging.debug("this is the device name " + str(dev_name))
+			if(dev_name.find("FY6800-40M") != -1):		## put the name of the device somewhere else
 					print("device found at " + port_name + " serial port")
 					ser.close()							# we will open the port creating a new serial object belinging to the class, so we close it here
 					return port_name				
 					
-			except:
-				logging.warning("Failed to send commands to serial device, is the port open?")
+
 
 
 		
@@ -296,6 +308,10 @@ class fy6800:
 	# How to know if write success: read a '\n'
 	
 	def set_param(self,channel,param_name,param_value):
+		
+		logging.debug("set_param method called:")
+		logging.debug(separator)
+		
 		if channel == 0:
 			chan = "M"
 		elif channel == 1:
@@ -320,6 +336,10 @@ class fy6800:
 	# RETURN VALUE: TYPE-UNICODE_STRING: parameter read from function generator
 
 	def get_param(self,channel,param_name):
+		
+		logging.debug("get_param method called:")
+		logging.debug(separator)
+		
 		logging.debug("Channel number is " + str(channel))
 		if channel == 0:
 			chan = "M"
